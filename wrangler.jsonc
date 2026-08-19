@@ -1,0 +1,10 @@
+{
+  "name": "aura-colombia",
+  "main": "worker.js",
+  "compatibility_date": "2026-08-18",
+  "assets": { "directory": "." },
+  "durable_objects": {
+    "bindings": [{ "name": "AURA", "class_name": "AuraGlobal" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["AuraGlobal"] }]
+}
