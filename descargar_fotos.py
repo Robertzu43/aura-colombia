@@ -95,11 +95,26 @@ def leer_roster():
     return [n for n, _ in re.findall(r"\['([^']+)','([^']+)'\]", script)]
 
 
+_ultima_llamada = [0.0]
+
+
 def api(host, params):
     params = dict(params, format='json')
     url = f'https://{host}/w/api.php?' + urllib.parse.urlencode(params)
-    with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30) as r:
-        return json.load(r)
+    # ritmo suave + reintentos con backoff: Wikipedia limita ráfagas anónimas
+    for intento in range(5):
+        espera = _ultima_llamada[0] + 0.25 - time.time()
+        if espera > 0:
+            time.sleep(espera)
+        _ultima_llamada[0] = time.time()
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30) as r:
+                return json.load(r)
+        except Exception as e:
+            if intento == 4:
+                print(f'  API agotó reintentos ({host}): {e}', file=sys.stderr)
+                raise
+            time.sleep(2 ** intento)
 
 
 def candidatos(nombre, extra=None):
@@ -150,8 +165,8 @@ def buscar_intitle(nombre):
                 urls = lote_pageimages(host, [hit['title']])
                 if urls:
                     return next(iter(urls.values()))
-        except Exception:
-            pass
+        except Exception as e:
+            print(f'  intitle {nombre} ({host}): {e}', file=sys.stderr)
     return None
 
 
@@ -169,8 +184,8 @@ def buscar_commons(nombre):
             info = (pg.get('imageinfo') or [{}])[0]
             if info.get('thumburl'):
                 return info['thumburl']
-    except Exception:
-        pass
+    except Exception as e:
+        print(f'  commons {nombre}: {e}', file=sys.stderr)
     return None
 
 
