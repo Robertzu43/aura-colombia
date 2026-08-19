@@ -445,8 +445,15 @@ const WIKI_EN = {
   'David Vélez': ['David Vélez (businessman)'],
 };
 
-const FOTOS_CLAVE = 'aura-colombia-fotos-v1';
-let fotos = cargarFotos();      // nombre -> url | null (null = confirmado sin foto)
+// Fotos fijas para gente sin artículo propio en Wikipedia (o con URL aportada a mano).
+// Estas ganan siempre sobre la API y el caché.
+const FOTOS_FIJAS = {
+  // Wikipedia no tiene artículo de ella pero sí esta foto en Commons
+  'Kika Nieto': 'https://es.wikipedia.org/wiki/Special:FilePath/Kika_Nieto_KCA_Colombia_2016.png?width=400',
+};
+
+const FOTOS_CLAVE = 'aura-colombia-fotos-v2';
+let fotos = Object.assign(cargarFotos(), FOTOS_FIJAS); // nombre -> url | null (null = confirmado sin foto)
 let fotosListas = false;
 let apiExitos = 0;              // llamadas exitosas a Wikipedia (0 = sin conexión)
 
@@ -512,8 +519,10 @@ async function buscarFoto(nombre) {
     try {
       const s = await apiWiki(host, { action: 'query', list: 'search', srsearch: `intitle:"${nombre}"`, srlimit: 3 });
       for (const hit of (s.query && s.query.search) || []) {
-        // exige que el título contenga todas las palabras del nombre (evita fotos de otra persona)
-        if (!tokens.every(w => sinAcentos(hit.title).includes(w))) continue;
+        // exige que cada palabra del nombre sea una palabra completa del título
+        // (evita p. ej. que "Cris" coincida dentro de "Cristian" y traiga la foto de otra persona)
+        const palabrasTitulo = sinAcentos(hit.title).split(/[^a-z0-9ñ]+/);
+        if (!tokens.every(w => palabrasTitulo.includes(w))) continue;
         const d = await apiWiki(host, {
           action: 'query', redirects: 1, prop: 'pageimages',
           piprop: 'thumbnail', pithumbsize: 400, titles: hit.title,
