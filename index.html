@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Aura Colombia 🇨🇴 — ¿Quién tiene más aura?</title>
-<meta name="description" content="Ranking Elo de aura con las 100 personas más conocidas de Colombia. Vota y decide quién tiene más aura, parce." />
+<meta name="description" content="Ranking Elo de aura con las personas más conocidas de Colombia. Vota y decide quién tiene más aura, parce." />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -257,10 +257,10 @@
   <header>
     <div class="bandera-linea"></div>
     <h1>AURA COLOMBIA</h1>
-    <p class="subtitulo">¿Quién tiene más aura, <strong>parce</strong>? El ranking Elo de las 100 personas más conocidas de Colombia. Tú decides. 🇨🇴</p>
+    <p class="subtitulo">¿Quién tiene más aura, <strong>parce</strong>? El ranking Elo de las <span id="stat-total-texto">100</span> personas más conocidas de Colombia. Tú decides. 🇨🇴</p>
     <div class="stats">
       <div class="stat"><div class="num" id="stat-votos">0</div><div class="lbl">Batallas de aura</div></div>
-      <div class="stat"><div class="num">100</div><div class="lbl">Leyendas</div></div>
+      <div class="stat"><div class="num" id="stat-total">100</div><div class="lbl">Leyendas</div></div>
       <div class="stat"><div class="num" id="stat-lider">—</div><div class="lbl">Líder actual</div></div>
     </div>
   </header>
@@ -297,12 +297,12 @@ const PERSONAS = [
   ['Greeicy','Música'],['Mike Bahía','Música'],['Silvestre Dangond','Música'],['Jorge Celedón','Música'],
   ['Jessi Uribe','Música'],['Paola Jara','Música'],['Pipe Bueno','Música'],['Yeison Jiménez','Música'],
   ['Andy Rivera','Música'],['Goyo','Música'],['Totó la Momposina','Música'],['Diomedes Díaz','Música'],
-  ['Joe Arroyo','Música'],['Farina','Música'],
+  ['Joe Arroyo','Música'],['Farina','Música'],['Kris R','Música'],
   // Fútbol
   ['James Rodríguez','Fútbol'],['Luis Díaz','Fútbol'],['Radamel Falcao','Fútbol'],['Juan G. Cuadrado','Fútbol'],
   ['David Ospina','Fútbol'],['Yerry Mina','Fútbol'],['Dayro Moreno','Fútbol'],['Carlos Valderrama','Fútbol'],
   ['René Higuita','Fútbol'],['Faustino Asprilla','Fútbol'],['Iván R. Córdoba','Fútbol'],['Mario Yepes','Fútbol'],
-  ['Linda Caicedo','Fútbol'],['Catalina Usme','Fútbol'],
+  ['Linda Caicedo','Fútbol'],['Catalina Usme','Fútbol'],['Gustavo Puerta','Fútbol'],
   // Ciclismo y deporte
   ['Egan Bernal','Ciclismo'],['Nairo Quintana','Ciclismo'],['Rigoberto Urán','Ciclismo'],['Fernando Gaviria','Ciclismo'],
   ['Esteban Chaves','Ciclismo'],['Lucho Herrera','Ciclismo'],['Mariana Pajón','Deporte'],['Caterine Ibargüen','Deporte'],
@@ -312,7 +312,7 @@ const PERSONAS = [
   ['Sofía Vergara','TV y Cine'],['John Leguizamo','TV y Cine'],['Catalina Sandino','TV y Cine'],['Manolo Cardona','TV y Cine'],
   ['Juan Pablo Raba','TV y Cine'],['Carmen Villalobos','TV y Cine'],['Andrés Parra','TV y Cine'],['Danna García','TV y Cine'],
   ['Margarita Rosa de Francisco','TV y Cine'],['Amparo Grisales','TV y Cine'],['Carolina Cruz','TV y Cine'],['Laura Acuña','TV y Cine'],
-  ['Claudia Bahamón','TV y Cine'],
+  ['Claudia Bahamón','TV y Cine'],['Esperanza Gómez','TV y Cine'],
   // Comedia
   ['Alejandro Riaño','Comedia'],['Suso el Paspi','Comedia'],['Andrés López','Comedia'],['Hassam','Comedia'],['Iván Marín','Comedia'],
   // Periodismo
@@ -320,10 +320,10 @@ const PERSONAS = [
   // Influencers
   ['Luisa Fernanda W','Influencer'],['Yeferson Cossio','Influencer'],['Westcol','Influencer'],['La Liendra','Influencer'],
   ['Aida Victoria Merlano','Influencer'],['Epa Colombia','Influencer'],['Kika Nieto','Influencer'],['Pautips','Influencer'],
-  ['Dani Duke','Influencer'],['La Segura','Influencer'],
+  ['Dani Duke','Influencer'],['La Segura','Influencer'],['Cris Valencia','Influencer'],
   // Cultura y ciencia
   ['Gabriel García Márquez','Cultura'],['Fernando Botero','Cultura'],['Rodolfo Llinás','Ciencia'],['Diana Trujillo','Ciencia'],
-  ['David Vélez','Negocios'],
+  ['David Vélez','Negocios'],['Simón Borrero','Negocios'],['Freddy Vega','Negocios'],
   // Política y reinado
   ['Gustavo Petro','Política'],['Álvaro Uribe','Política'],['Juan Manuel Santos','Política'],['Francia Márquez','Política'],
   ['Paulina Vega','Reinado'],
@@ -540,12 +540,14 @@ tabRanking.addEventListener('click', () => {
 
 function actualizarStats() {
   document.getElementById('stat-votos').textContent = estado.votos.toLocaleString('es-CO');
+  document.getElementById('stat-total').textContent = PERSONAS.length;
+  document.getElementById('stat-total-texto').textContent = PERSONAS.length;
   const lider = ordenados()[0].nombre;
   document.getElementById('stat-lider').textContent = lider.split(' ')[0];
 }
 
 document.getElementById('btn-reset').addEventListener('click', () => {
-  if (!confirm('¿Seguro? Esto reinicia el aura de las 100 leyendas a 1000.')) return;
+  if (!confirm('¿Seguro? Esto reinicia el aura de todas las leyendas a 1000.')) return;
   localStorage.removeItem(CLAVE);
   estado = cargar();
   actualizarStats();

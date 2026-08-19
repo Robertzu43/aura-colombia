@@ -6,7 +6,7 @@ colores y personajes colombianos.
 
 ## Cómo funciona
 
-- **Ranking Elo**: las 100 personas más conocidas de Colombia arrancan con 1000 de aura.
+- **Ranking Elo**: las personas más conocidas de Colombia (106 y contando) arrancan con 1000 de aura.
 - **Batallas 1v1**: la página te muestra dos personajes y eliges quién tiene más aura
   (clic o flechas `←` / `→`). El ganador roba aura al perdedor según la fórmula Elo (K=32).
 - **Ranking en vivo**: pestaña 🏆 con el top 100, medallas, corona para el líder y barras de aura.
