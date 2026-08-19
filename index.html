@@ -447,13 +447,16 @@ const WIKI_EN = {
 
 // Fotos fijas para gente sin artículo propio en Wikipedia (o con URL aportada a mano).
 // Estas ganan siempre sobre la API y el caché.
-const FOTOS_FIJAS = {
-  // Sin artículo propio en Wikipedia pero con foto verificada en Commons
+// Respaldo remoto para gente sin artículo propio o con archivo que el matching
+// automático no reconoce; se usa solo si el manifest local no las cubre.
+const FOTOS_RESPALDO = {
   'Kika Nieto': 'https://commons.wikimedia.org/wiki/Special:FilePath/Kika_Nieto_KCA_Colombia_2016.png?width=400',
   'Luisa Fernanda W': 'https://commons.wikimedia.org/wiki/Special:FilePath/Luisa_Fernanda_W_2017.png?width=400',
   'Aida Victoria Merlano': 'https://commons.wikimedia.org/wiki/Special:FilePath/Aida_Victoria_Merlano.jpg?width=400',
-  // El archivo existe pero su nombre no separa palabras y el matching automático lo rechazaría
   'Diomedes Díaz': 'https://commons.wikimedia.org/wiki/Special:FilePath/Diomedesdiaz2.png?width=400',
+};
+
+const FOTOS_FIJAS = {
   // Sin foto en Wikipedia/Commons: imágenes aportadas a mano, servidas desde el repo
   'Kris R': 'fotos/kris-r.jpg',
   'Cris Valencia': 'fotos/cris-valencia.jpg',
@@ -576,6 +579,15 @@ async function buscarFotoCommons(nombre) {
 }
 
 async function cargarTodasLasFotos() {
+  // 0) manifest local generado por descargar_fotos.py: fotos servidas desde el
+  //    propio repo, sin depender de Wikipedia en vivo
+  try {
+    const r = await fetch('fotos/manifest.json');
+    if (r.ok) Object.assign(fotos, await r.json(), FOTOS_FIJAS);
+  } catch (e) {}
+  // respaldo remoto solo para lo que el manifest no cubra
+  for (const k in FOTOS_RESPALDO) if (fotos[k] === undefined) fotos[k] = FOTOS_RESPALDO[k];
+
   const pendientes = PERSONAS.map(p => p.nombre).filter(n => fotos[n] === undefined);
   if (pendientes.length) {
     const loteEs = await fotosPorTitulo('es.wikipedia.org', [...new Set(pendientes.flatMap(n => candidatos(n)))]);
