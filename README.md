@@ -10,6 +10,11 @@ colores y personajes colombianos.
 - **Batallas 1v1**: la página te muestra dos personajes y eliges quién tiene más aura
   (clic o flechas `←` / `→`). El ganador roba aura al perdedor según la fórmula Elo (K=32).
 - **Ranking en vivo**: pestaña 🏆 con el top 100, medallas, corona para el líder y barras de aura.
+- **Fotos reales**: se cargan en el navegador desde la API de Wikipedia (español, con
+  fallback a inglés y a búsqueda por título), se cachean en `localStorage` y si alguien
+  no tiene foto se muestra su avatar de iniciales. El botón "📷 Estado de fotos" del
+  footer (o entrar con `?fotos` en la URL) abre un panel que lista quiénes tienen foto
+  y quiénes no.
 - Los votos se guardan en `localStorage` del navegador.
 
 ## Stack
