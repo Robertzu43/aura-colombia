@@ -194,8 +194,20 @@ def descargar(url, nombre):
     if ext not in ('.jpg', '.jpeg', '.png', '.gif', '.webp'):
         ext = '.jpg'
     destino = f'{slug(nombre)}{ext}'
-    with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60) as r:
-        datos = r.read()
+    # mismo ritmo suave + reintentos que api(): upload.wikimedia también limita ráfagas
+    for intento in range(5):
+        espera = _ultima_llamada[0] + 0.25 - time.time()
+        if espera > 0:
+            time.sleep(espera)
+        _ultima_llamada[0] = time.time()
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60) as r:
+                datos = r.read()
+            break
+        except Exception as e:
+            if intento == 4:
+                raise
+            time.sleep(2 ** intento)
     with open(os.path.join(FOTOS, destino), 'wb') as f:
         f.write(datos)
     return destino
