@@ -448,8 +448,12 @@ const WIKI_EN = {
 // Fotos fijas para gente sin artículo propio en Wikipedia (o con URL aportada a mano).
 // Estas ganan siempre sobre la API y el caché.
 const FOTOS_FIJAS = {
-  // Wikipedia no tiene artículo de ella pero sí esta foto en Commons
-  'Kika Nieto': 'https://es.wikipedia.org/wiki/Special:FilePath/Kika_Nieto_KCA_Colombia_2016.png?width=400',
+  // Sin artículo propio en Wikipedia pero con foto verificada en Commons
+  'Kika Nieto': 'https://commons.wikimedia.org/wiki/Special:FilePath/Kika_Nieto_KCA_Colombia_2016.png?width=400',
+  'Luisa Fernanda W': 'https://commons.wikimedia.org/wiki/Special:FilePath/Luisa_Fernanda_W_2017.png?width=400',
+  'Aida Victoria Merlano': 'https://commons.wikimedia.org/wiki/Special:FilePath/Aida_Victoria_Merlano.jpg?width=400',
+  // El archivo existe pero su nombre no separa palabras y el matching automático lo rechazaría
+  'Diomedes Díaz': 'https://commons.wikimedia.org/wiki/Special:FilePath/Diomedesdiaz2.png?width=400',
 };
 
 const FOTOS_CLAVE = 'aura-colombia-fotos-v3';
