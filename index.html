@@ -452,7 +452,7 @@ const FOTOS_FIJAS = {
   'Kika Nieto': 'https://es.wikipedia.org/wiki/Special:FilePath/Kika_Nieto_KCA_Colombia_2016.png?width=400',
 };
 
-const FOTOS_CLAVE = 'aura-colombia-fotos-v2';
+const FOTOS_CLAVE = 'aura-colombia-fotos-v3';
 let fotos = Object.assign(cargarFotos(), FOTOS_FIJAS); // nombre -> url | null (null = confirmado sin foto)
 let fotosListas = false;
 let apiExitos = 0;              // llamadas exitosas a Wikipedia (0 = sin conexión)
@@ -535,6 +535,28 @@ async function buscarFoto(nombre) {
   return null;
 }
 
+// 4º recurso: buscar la imagen directamente en Wikimedia Commons
+async function buscarFotoCommons(nombre) {
+  const tokens = sinAcentos(nombre).split(/\s+/).filter(w => w.length > 2);
+  try {
+    const d = await apiWiki('commons.wikimedia.org', {
+      action: 'query', generator: 'search', gsrnamespace: 6, gsrlimit: 10,
+      gsrsearch: `intitle:"${nombre}" filetype:bitmap`,
+      prop: 'imageinfo', iiprop: 'url', iiurlwidth: 400,
+    });
+    const paginas = Object.values((d.query && d.query.pages) || {})
+      .sort((a, b) => (a.index || 99) - (b.index || 99));
+    for (const pg of paginas) {
+      // mismo criterio estricto: todas las palabras del nombre como palabras completas del archivo
+      const palabras = sinAcentos(pg.title.replace(/^file:/i, '')).split(/[^a-z0-9]+/);
+      if (!tokens.every(w => palabras.includes(w))) continue;
+      const info = pg.imageinfo && pg.imageinfo[0];
+      if (info && info.thumburl) return info.thumburl;
+    }
+  } catch (e) {}
+  return null;
+}
+
 async function cargarTodasLasFotos() {
   const pendientes = PERSONAS.map(p => p.nombre).filter(n => fotos[n] === undefined);
   if (pendientes.length) {
@@ -552,7 +574,7 @@ async function cargarTodasLasFotos() {
     faltan = pendientes.filter(n => fotos[n] === undefined);
     if (apiExitos) { // sin conexión no vale la pena buscar uno por uno
       for (const n of faltan) {
-        const url = await buscarFoto(n);
+        const url = (await buscarFoto(n)) || (await buscarFotoCommons(n));
         fotos[n] = url || null; // null = confirmado sin foto
       }
       guardarFotos();
